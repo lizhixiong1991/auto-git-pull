@@ -1,0 +1,1256 @@
+﻿
+
+
+
+<!DOCTYPE HTML>
+<html class="no-js bg" lang="zh-cmn-Hans">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta charset="UTF-8">
+    <!--IE 8浏览器的页面渲染方式-->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+    <!--默认使用极速内核：针对国内浏览器产商-->
+    <meta name="renderer" content="webkit">
+    <!--chrome Android 地址栏颜色-->
+        <meta name="theme-color" content="#3a3f51" />
+    
+    <meta http-equiv="x-dns-prefetch-control" content="on">
+
+    <title>本地开发GIT实现自动拉取更新代码 一键git pull 多项目支持 - 尘世的小博客</title>
+            <link rel="icon" type="image/ico" href="/favicon.ico">
+        <meta name="description" content="背景日常开发下会有很多项目要处理，但是每次去开发一个很久没有动过的项目会发现代码有很多更新没有拉取，去手动git pull可能会需要很久的时间。所以稍微研究了一下，写了个脚本，用于定时拉取常用的..." />
+<meta name="generator" content="Typecho 1.1/17.10.30" />
+<meta name="template" content="handsome" />
+<link rel="pingback" href="https://www.leeay.com/action/xmlrpc" />
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://www.leeay.com/action/xmlrpc?rsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="https://www.leeay.com/action/xmlrpc?wlw" />
+<link rel="alternate" type="application/rss+xml" title="本地开发GIT实现自动拉取更新代码 一键git pull 多项目支持 &raquo; 尘世的小博客 &raquo; RSS 2.0" href="https://www.leeay.com/feed/archives/85/" />
+<link rel="alternate" type="application/rdf+xml" title="本地开发GIT实现自动拉取更新代码 一键git pull 多项目支持 &raquo; 尘世的小博客 &raquo; RSS 1.0" href="https://www.leeay.com/feed/rss/archives/85/" />
+<link rel="alternate" type="application/atom+xml" title="本地开发GIT实现自动拉取更新代码 一键git pull 多项目支持 &raquo; 尘世的小博客 &raquo; ATOM 1.0" href="https://www.leeay.com/feed/atom/archives/85/" />
+<link rel="stylesheet" type="text/css" href="https://www.leeay.com/usr/plugins/CodePrettify/static/styles/BlackMac.css" />
+        <!-- 第三方CDN加载CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <!-- 本地css静态资源 -->
+    <link rel="stylesheet" href="https://www.leeay.com/usr/themes/handsome/assets/css/function.min.css?v=6.0.020191205" type="text/css" />
+    <link rel="stylesheet" href="https://www.leeay.com/usr/themes/handsome/assets/css/handsome.min.css?v=6.0.020191205" type="text/css" />
+
+
+
+    <!--主题组件css文件加载-->
+    <link rel="stylesheet" href="https://www.leeay.com/usr/themes/handsome/assets/css/features/jquery.fancybox.min.css?v=6.0.020191205" type="text/css" />
+            <link rel="stylesheet" href="https://www.leeay.com/usr/themes/handsome/assets/css/features/code/vs.min.css?v=6.0.020191205" type="text/css" />
+    
+    <!--引入英文字体文件-->
+        <link rel="stylesheet" href="https://www.leeay.com/usr/themes/handsome/assets/css/font.min.css?v=6.0.020191205" type="text/css" />
+    
+    <style type="text/css">
+        
+        html.bg {
+                   background-image:
+               -moz-radial-gradient(-20% 140%, ellipse ,  rgba(255,144,187,.6) 30%,rgba(255,255,227,0) 50%),
+               -moz-linear-gradient(top,  rgba(57,173,219,.25) 0%,rgba(42,60,87,.4) 100%),
+               -moz-radial-gradient(60% 40%,ellipse,   #d9e3e5 10%,rgba(44,70,76,.0) 60%),
+               -moz-linear-gradient(-45deg,  rgba(18,101,101,.8) -10%,#d9e3e5 80% )
+               ;
+           background-image:
+               -o-radial-gradient(-20% 140%, ellipse ,  rgba(255,144,187,.6) 30%,rgba(255,255,227,0) 50%),
+               -o-linear-gradient(top,  rgba(57,173,219,.25) 0%,rgba(42,60,87,.4) 100%),
+               -o-radial-gradient(60% 40%,ellipse,   #d9e3e5 10%,rgba(44,70,76,.0) 60%),
+               -o-linear-gradient(-45deg,  rgba(18,101,101,.8) -10%,#d9e3e5 80% )
+               ;
+           background-image:
+               -ms-radial-gradient(-20% 140%, ellipse ,  rgba(255,144,187,.6) 30%,rgba(255,255,227,0) 50%),
+               -ms-linear-gradient(top,  rgba(57,173,219,.25) 0%,rgba(42,60,87,.4) 100%),
+               -ms-radial-gradient(60% 40%,ellipse,   #d9e3e5 10%,rgba(44,70,76,.0) 60%),
+               -ms-linear-gradient(-45deg,  rgba(18,101,101,.8) -10%,#d9e3e5 80% )
+               ;
+           background-image:
+               -webkit-radial-gradient(-20% 140%, ellipse ,  rgba(255,144,187,.6) 30%,rgba(255,255,227,0) 50%),
+               -webkit-linear-gradient(top,  rgba(57,173,219,.25) 0%,rgba(42,60,87,.4) 100%),
+               -webkit-radial-gradient(60% 40%,ellipse,   #d9e3e5 10%,rgba(44,70,76,.0) 60%),
+               -webkit-linear-gradient(-45deg,  rgba(18,101,101,.8) -10%,#d9e3e5 80% )
+               ;
+        }
+        .cool-transparent .off-screen+* .app-content-body {
+                   background-image:
+               -moz-radial-gradient(-20% 140%, ellipse ,  rgba(255,144,187,.6) 30%,rgba(255,255,227,0) 50%),
+               -moz-linear-gradient(top,  rgba(57,173,219,.25) 0%,rgba(42,60,87,.4) 100%),
+               -moz-radial-gradient(60% 40%,ellipse,   #d9e3e5 10%,rgba(44,70,76,.0) 60%),
+               -moz-linear-gradient(-45deg,  rgba(18,101,101,.8) -10%,#d9e3e5 80% )
+               ;
+           background-image:
+               -o-radial-gradient(-20% 140%, ellipse ,  rgba(255,144,187,.6) 30%,rgba(255,255,227,0) 50%),
+               -o-linear-gradient(top,  rgba(57,173,219,.25) 0%,rgba(42,60,87,.4) 100%),
+               -o-radial-gradient(60% 40%,ellipse,   #d9e3e5 10%,rgba(44,70,76,.0) 60%),
+               -o-linear-gradient(-45deg,  rgba(18,101,101,.8) -10%,#d9e3e5 80% )
+               ;
+           background-image:
+               -ms-radial-gradient(-20% 140%, ellipse ,  rgba(255,144,187,.6) 30%,rgba(255,255,227,0) 50%),
+               -ms-linear-gradient(top,  rgba(57,173,219,.25) 0%,rgba(42,60,87,.4) 100%),
+               -ms-radial-gradient(60% 40%,ellipse,   #d9e3e5 10%,rgba(44,70,76,.0) 60%),
+               -ms-linear-gradient(-45deg,  rgba(18,101,101,.8) -10%,#d9e3e5 80% )
+               ;
+           background-image:
+               -webkit-radial-gradient(-20% 140%, ellipse ,  rgba(255,144,187,.6) 30%,rgba(255,255,227,0) 50%),
+               -webkit-linear-gradient(top,  rgba(57,173,219,.25) 0%,rgba(42,60,87,.4) 100%),
+               -webkit-radial-gradient(60% 40%,ellipse,   #d9e3e5 10%,rgba(44,70,76,.0) 60%),
+               -webkit-linear-gradient(-45deg,  rgba(18,101,101,.8) -10%,#d9e3e5 80% )
+               ;
+        }
+@media (max-width:767px){
+    html.bg {
+        
+        }
+        .cool-transparent .off-screen+* .app-content-body {
+        
+        }
+}
+    </style>
+
+    <!--全站jquery-->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@2.2.4/dist/jquery.min.js"></script>
+
+    <!--网站统计代码-->
+    <script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?56c948cd451ae6f55e1dd0a3be2691bf";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    <script src="https://www.leeay.com/usr/themes/handsome/assets/js/features/fancyMorph.min.js"></script>
+
+
+</head>
+
+<body id="body" class="fix-padding">
+
+	<!-- aside -->
+	  
+  <div id="alllayout" class="app app-aside-fix container app-header-fixed ">  <!-- headnav -->
+      <header id="header" class="fix-padding app-header navbar box-shadow-bottom-lg" role="menu">
+      <!-- navbar header（交集处） -->
+        <div class="text-ellipsis navbar-header bg-dark">
+        <button class="pull-right visible-xs" ui-toggle-class="show animated animated-lento fadeIn" target=".navbar-collapse">
+            <span class="menu-icons"><i data-feather="search"></i></span>
+        </button>
+        <button class="pull-left visible-xs" ui-toggle-class="off-screen animated" target=".app-aside" ui-scroll="app">
+            <span class="menu-icons"><i data-feather="menu"></i></span>
+        </button>
+        <!-- brand -->
+        <a href="https://www.leeay.com/" class="navbar-brand text-lt">
+                                                <i class="fontello fontello-home"></i>
+                                <span class="hidden-folded m-l-xs">尘世的小博客</span>
+                    </a>
+        <!-- / brand -->
+      </div>
+      <!-- / navbar header -->
+
+      <!-- navbar collapse（顶部导航栏） -->
+    <div class="collapse pos-rlt navbar-collapse bg-dark">
+        <!-- search form -->
+        <form id="searchform1" class="searchform navbar-form navbar-form-sm navbar-left shift" method="post"
+              role="search">
+          <div class="form-group">
+            <div class="input-group rounded bg-white-pure box-shadow-wrap-normal">
+              <input  autocomplete="off" id="search_input" type="search" name="s" class="transparent rounded form-control input-sm no-borders padder" required placeholder="输入关键词搜索…">
+                <!--搜索提示-->
+                <ul id="search_tips_drop" class="small-scroll-bar dropdown-menu hide" style="display: block;top: 
+                30px; left: 0px;">
+                </ul>
+              <span id="search_submit" class="transparent input-group-btn">
+                  <button  type="submit" class="transparent btn btn-sm">
+                      <span class="feathericons" id="icon-search"><i data-feather="search"></i></span>
+                      <span class="feathericons animate-spin  hide" id="spin-search"><i
+                                  data-feather="loader"></i></span>
+<!--                      <i class="fontello fontello-search" id="icon-search"></i>-->
+<!--                      <i class="animate-spin  fontello fontello-spinner hide" id="spin-search"></i>-->
+                  </button>
+              </span>
+            </div>
+          </div>
+        </form>
+          <a href="" style="display: none" id="searchUrl"></a>
+        <!-- / search form -->
+                <ul class="nav navbar-nav navbar-right">
+                        <li class="music-box hidden-xs hidden-sm">
+                <div id="skPlayer"></div>
+            </li>
+            <li class="dropdown "><a class="skPlayer-list-switch dropdown-toggle
+            feathericons"><i
+                            data-feather="disc"></i><span class="visible-xs-inline"></span></a></li>
+                                              <!--闲言碎语-->
+          <li class="dropdown">
+            <a href="#" data-toggle="dropdown" class="feathericons dropdown-toggle">
+                <i data-feather="twitch"></i>
+                <span class="visible-xs-inline">
+              闲言碎语              </span>
+              <span class="badge badge-sm up bg-danger pull-right-xs"></span>
+            </a>
+            <!-- dropdown -->
+            <div class="dropdown-menu w-xl animated fadeInUp">
+              <div class="panel bg-white">
+                <div class="panel-heading b-light bg-light">
+                  <strong>
+              闲言碎语                  </strong>
+                </div>
+                <div class="list-group" id="smallRecording">
+                  <a href="https://www.leeay.com/cross.html" class="list-group-item"><span class="clear block m-b-none words_contents">Mysql笔记update table set small_code = right(full_code, 6);截取full_code后6位到small_code上<br><small class="text-muted">2020-3-15 09:26:15</small></span></a><a href="https://www.leeay.com/cross.html" class="list-group-item"><span class="clear block m-b-none words_contents">laravel 笔记$newModel= Model::first()-&gt;replicate();$newModel-&gt;save(); // 记得save(),replicate()创建出来是一个new Model的数据<br><small class="text-muted">2020-2-24 11:26:35</small></span></a><a href="https://www.leeay.com/cross.html" class="list-group-item"><span class="clear block m-b-none words_contents">laravel 笔记refresh 方法使用数据库中的新数据重新赋值现有模型。此外，已经加载的关系会被重新加载$model-&gt;refresh();<br><small class="text-muted">2020-2-24 11:24:40</small></span></a>                </div>
+              </div>
+            </div>
+          </li>
+          <!--/闲言碎语-->
+                                  <!--登录管理-->
+          <li class="dropdown" id="easyLogin">
+            <a onclick="return false" data-toggle="dropdown" class="dropdown-toggle clear" data-toggle="dropdown">
+                        <span class="feathericons"><i data-feather="key"></i></span>
+                        <b class="caret"></b><!--下三角符号-->
+            </a>
+            <!-- dropdown(已经登录) -->
+                      <div class="dropdown-menu w-lg wrapper bg-white animated fadeIn" aria-labelledby="navbar-login-dropdown">
+            <form id="Login_form" action="https://www.leeay.com/index.php/action/login?_=c3660139b6746cf643b928ebf3408762" method="post">
+              <div class="form-group">
+                <label for="navbar-login-user">用户名</label>
+                <input type="text" name="name" id="navbar-login-user" class="form-control" placeholder="用户名或电子邮箱"></div>
+              <div class="form-group">
+                <label for="navbar-login-password">密码</label>
+                <input type="password" name="password" id="navbar-login-password" class="form-control" placeholder="密码"></div>
+                <button style="width: 100%" type="submit" id="login-submit" name ="submitLogin" class="btn-rounded box-shadow-wrap-lg btn-gd-primary padder-lg">
+                    <span>登录</span>
+                    <span class="text-active">登录中...</span>
+                    <span class="banLogin_text">刷新页面后登录</span>
+                    <i class="animate-spin  fontello fontello-spinner hide" id="spin-login"></i>
+                    <i class="animate-spin fontello fontello-refresh hide" id="ban-login"></i>
+                </button>
+
+
+              
+              <input type="hidden" name="referer" value="https://www.leeay.com"
+                     data-current-url="value"></form>
+          </div>
+                    </li>
+          <!--/登录管理-->
+                    </ul>
+      </div>
+      <!-- / navbar collapse -->
+  </header>
+  <!-- / headnav -->
+
+  <!--选择侧边栏的颜色-->
+  <aside id="aside" class="app-aside hidden-xs bg-light">  <!--<aside>-->
+        <div class="aside-wrap" layout="column">
+        <div class="navi-wrap scroll-y scroll-hide" flex>
+          <!-- user -->
+          <div class="clearfix hidden-xs text-center hide  show" id="aside-user">
+            <div class="dropdown wrapper vertical-wrapper">
+                <div ui-nav>
+                          <a href="https://www.leeay.com/cross.html">
+                            <span class="thumb-lg w-auto-folded avatar m-t-sm  vertical-avatar">
+                  <img src="https://gitee.com/asundust/images/raw/master/images/asundust_avatar.jpg" class="img-full img-circle normal-shadow">
+                </span>
+              </a>
+                </div>
+              <a href="#" data-toggle="dropdown" class="dropdown-toggle hidden-folded  vertical-flex">
+                <span class="clear">
+                  <span class="block m-t-sm">
+                    <strong class="font-bold text-lt">asundust</strong>
+                    <b class="caret"></b>
+                  </span>
+                  <span class="text-muted text-xs block">塵世不再</span>
+                </span>
+              </a>
+              <!-- dropdown -->
+              <ul class="dropdown-menu animated fadeInRight w hidden-folded no-padder">
+                <li class="wrapper b-b m-b-sm bg-info m-n">
+                  <span class="arrow top hidden-folded arrow-info"></span>
+                  <div>
+                                                  <p>早上好，永远年轻，永远热泪盈眶</p>
+                                  </div>
+                  <div class="progress progress-xs m-b-none dker">
+                    <div class="progress-bar bg-white" data-toggle="tooltip" data-original-title="时间已经度过45.83%" style="width: 45.83%"></div>
+                  </div>
+                </li>
+              </ul>
+              <!-- / dropdown -->
+            </div>
+          </div>
+          <!-- / user -->
+
+          <!-- nav -->
+          <nav ui-nav class="navi clearfix">
+            <ul class="nav">
+             <!--index-->
+                <div class="line dk hidden-folded"></div>
+                <li class="hidden-folded padder m-t m-b-sm text-muted text-xs">
+                <span>导航</span>
+              </li>
+                                          <!--主页-->
+              <li>
+                <a href="https://www.leeay.com/" class="auto">
+                    <span class="nav-icon"><i data-feather="home"></i></span>
+                    <span>首页</span>
+                </a>
+              </li>
+              <!-- /主页 -->
+                                                          <li class="line dk"></li>
+			<!--Components-->
+              <li class="hidden-folded padder m-t m-b-sm text-muted text-xs">
+                <span>组成</span>
+              </li>
+              <!--分类category-->
+                              <li class="active">
+                <a class="auto">
+                  <span class="pull-right text-muted">
+                    <i class="fontello icon-fw fontello-angle-right text"></i>
+                    <i class="fontello icon-fw fontello-angle-down text-active"></i>
+                  </span>
+<!--                  <i class="glyphicon glyphicon-th"></i>-->
+                    <span class="nav-icon"><i data-feather="grid"></i></span>
+
+                    <span>分类</span>
+                </a>
+                <ul class="nav nav-sub dk">
+                  <li class="nav-sub-header">
+                    <a>
+                      <span>分类</span>
+                    </a>
+                  </li>
+                  <!--循环输出分类-->
+                    <li><a href="https://www.leeay.com/category/default/"><b class="badge pull-right">2</b><span>默认分类</span></a></li><li><a href="https://www.leeay.com/category/%E4%BC%91%E9%97%B2%E8%AE%B0%E4%BA%8B/"><b class="badge pull-right">1</b><span>休闲记事</span></a></li><li><a href="https://www.leeay.com/category/%E6%95%99%E7%A8%8B%E4%B8%AD%E5%BF%83/"><b class="badge pull-right">5</b><span>教程中心</span></a></li><li><a href="https://www.leeay.com/category/%E4%BB%A3%E7%A0%81%E5%A4%A9%E4%B8%8B/"><b class="badge pull-right">4</b><span>代码天下</span></a></li><li><a href="https://www.leeay.com/category/Laravel/"><b class="badge pull-right">1</b><span>Laravel</span></a></li>                </ul>
+              </li>
+              <!--独立页面pages-->
+              <li>
+                <a class="auto">
+                  <span class="pull-right text-muted">
+                    <i class="fontello icon-fw fontello-angle-right text"></i>
+                    <i class="fontello icon-fw fontello-angle-down text-active"></i>
+                  </span>
+                    <span class="nav-icon"><i data-feather="file"></i></span>
+                  <span>页面</span>
+                </a>
+                <ul class="nav nav-sub dk">
+                  <li class="nav-sub-header">
+                    <a data-no-instant>
+                      <span>页面</span>
+                    </a>
+                  </li><!--这个字段不会被显示出来-->
+                  <!--循环输出独立页面-->
+                                                                                   <li><a href="https://www.leeay.com/start-page.html"><span>关于</span></a></li>
+                                                                 <li><a href="https://www.leeay.com/cross.html"><span>时光机</span></a></li>
+                                   </ul>
+              </li>
+              <!--友情链接-->
+              <li>
+                <a class="auto">
+                  <span class="pull-right text-muted">
+                    <i class="fontello icon-fw fontello-angle-right text"></i>
+                    <i class="fontello icon-fw fontello-angle-down text-active"></i>
+                  </span>
+                    <span class="nav-icon"><i data-feather="user"></i></span>
+                  <span>友链</span>
+                </a>
+                <ul class="nav nav-sub dk">
+                  <li class="nav-sub-header">
+                    <a data-no-instant>
+                      <span>友链</span>
+                    </a>
+                  </li>
+                  <!--使用links插件，输出全站友链-->
+                 <li data-original-title="一个神秘的人" data-toggle="tooltip" 
+data-placement="top"><a href="https://ramiko.me/" target="_blank"><span>Ramik0</span></a></li><li data-original-title="一个神秘的人" data-toggle="tooltip" 
+data-placement="top"><a href="http://b.87bike.com/" target="_blank"><span>地瓜酱的仓库</span></a></li>                </ul>
+              </li>
+                            </ul>
+          </nav>
+          <!-- nav -->
+        </div>
+          <!--end of .navi-wrap-->
+          <!--left_footer-->
+                    <div id="left_footer" class="footer wrapper-xs text-center nav-xs lt">
+                  
+                                        <div class="col-xs-4 no-padder">
+                          <a target="_blank" class="tinav" href="https://www.leeay.com/admin/" title="" data-toggle="tooltip" data-placement="top" data-original-title="后台管理">
+                              <span class="left-bottom-icons block"><i data-feather="settings"></i></span>
+                              <small class="text-muted">管理</small>
+                          </a>
+                      </div>
+                                    <div class="col-xs-4 no-padder">
+                      <a target="_blank" class="tinav" href="https://www.leeay.com/feed/" title="" data-toggle="tooltip" data-placement="top" data-original-title="文章RSS地址">
+                          <span class="left-bottom-icons block"><i data-feather="rss"></i></span>
+                          <small class="text-muted">文章</small>
+                      </a>
+                  </div>
+                  <div class="col-xs-4 no-padder">
+                      <a target="_blank" href="https://www.leeay.com/feed/comments/" title="" data-toggle="tooltip" data-placement="top" data-original-title="评论RSS地址">
+                          <span class="left-bottom-icons block"><i data-feather="message-square"></i></span>
+                          <small class="text-muted">评论</small>
+                      </a>
+                  </div>
+          </div>
+          
+      </div><!--.aside-wrap-->
+  </aside>
+<!-- content -->
+<div id="content" class="app-content">
+    <!--loading animate-->
+    <div id="loading" class="butterbar active hide">
+            <span class="bar"></span>
+        </div>	<!-- / aside -->
+<style>
+    #post-content{
+        font-size: 14px;
+    }
+</style>
+<!-- <div id="content" class="app-content"> -->
+   <a class="off-screen-toggle hide"></a>
+   <main class="app-content-body ">
+    <div class="hbox hbox-auto-xs hbox-auto-sm">
+    <!--文章-->
+     <div class="col center-part">
+         <!--生成分享图片必须的HTML结构-->
+             <!--标题下的一排功能信息图标：作者/时间/浏览次数/评论数/分类-->
+      
+        <header id="small_widgets" class="bg-light lter wrapper-md">
+             <h1 class="entry-title m-n font-thin text-black l-h">本地开发GIT实现自动拉取更新代码 一键git pull 多项目支持<a class="plus-font-size" data-toggle="tooltip" data-original-title="点击改变文章字体大小"><i data-feather="type"></i></a><a data-morphing="" id="morphing" data-src="#morphing-content" href="javascript:;" class="read_mode superscript m-l-sm" 
+data-toggle="tooltip" data-placement="right" data-original-title="阅读模式"><i data-feather="book-open"></i></a></h1>       <!--文章标题下面的小部件-->
+                  <ul  class="entry-meta text-muted list-inline m-b-none small
+             post-head-icon">
+             <!--作者-->
+             <li class="meta-author"><span class="post-icons"><i data-feather="user"></i></span><span
+                         class="sr-only">博主：</span> <a class="meta-value" href="https://www.leeay.com/author/1/" rel="author"> asundust</a></li>
+             <!--发布时间-->
+             <li class="meta-date"><span class="post-icons"><i data-feather="clock"></i></span><span class="sr-only">发布时间：</span><time class="meta-value">2020 年 05 月 07 日</time></li>
+             <!--浏览数-->
+             <li class="meta-views"><span class="post-icons"><i data-feather="eye"></i></span><span class="meta-value">883次浏览</span></li>
+                              <!--评论数-->
+                 <li class="meta-comments"><span class="post-icons"><i data-feather="message-circle"></i></span><a
+                             class="meta-value" href="#comments">暂无评论</a></li>
+             
+             <!--文字数目-->
+             <li class="meta-word"><span class="post-icons"><i data-feather="pen-tool"></i></span><span class="meta-value">1621字数</span></li>
+             <!--分类-->
+             <li class="meta-categories"><span class="post-icons"><i data-feather="hash"></i></span><span class="sr-only">分类：</span> <span class="meta-value"><a href="https://www.leeay.com/category/default/">默认分类</a> <a href="https://www.leeay.com/category/%E6%95%99%E7%A8%8B%E4%B8%AD%E5%BF%83/">教程中心</a> <a href="https://www.leeay.com/category/%E4%BB%A3%E7%A0%81%E5%A4%A9%E4%B8%8B/">代码天下</a></span></li>
+         </ul>
+      </header>
+      <div class="wrapper-md" id="post-panel">
+	   <ol class="breadcrumb bg-white-pure" itemscope=""><li>
+                 <a href="https://www.leeay.com/" itemprop="breadcrumb" title="返回首页" data-toggle="tooltip"><span class="home-icons"><i data-feather="home"></i></span>首页</a>
+             </li><li class="active">正文&nbsp;&nbsp;</li>
+              <div style="float:right;">
+   分享到：
+   <style>
+   .breadcrumb i.iconfont.icon-qzone:after {
+    padding: 0 0 0 5px;
+    color: #ccc;
+    content: "/\00a0";
+    }
+    
+   </style>
+   <a href="http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://www.leeay.com/archives/85/&title=本地开发GIT实现自动拉取更新代码 一键git pull 多项目支持&site=https://www.leeay.com/" itemprop="breadcrumb" target="_blank" title="" data-toggle="tooltip" data-original-title="分享到QQ空间" onclick="window.open(this.href, 'qzone-share', 'width=550,height=335');return false;"><i style ="font-size:15px;" class="iconfont icon-qzone" aria-hidden="true"></i></a>
+   <a href="http://service.weibo.com/share/share.php?url=https://www.leeay.com/archives/85/&title=本地开发GIT实现自动拉取更新代码 一键git pull 多项目支持" target="_blank" itemprop="breadcrumb" title="" data-toggle="tooltip" data-original-title="分享到微博" onclick="window.open(this.href, 'weibo-share', 'width=550,height=335');return false;"><i style ="font-size:15px;" class="fontello fontello-weibo" aria-hidden="true"></i></a></div></ol>       <!--博客文章样式 begin with .blog-post-->
+       <div id="postpage" class="blog-post">
+        <article class="single-post panel">
+        <!--文章页面的头图-->
+        <div class="entry-thumbnail" aria-hidden="true"><div class="item-thumb lazy"  style="background-image: url(https://gitee.com/asundust/images/raw/master/images/image_19.jpg)"></div></div>         <!--文章内容-->
+         <div id="post-content" class="wrapper-lg">
+          <div class="entry-content l-h-2x">
+          <h3>背景</h3><p>日常开发下会有很多项目要处理，但是每次去开发一个很久没有动过的项目会发现代码有很多更新没有拉取，去手动<code>git pull</code>可能会需要很久的时间。所以稍微研究了一下，写了个脚本，用于定时拉取常用的项目。</p><h3>原理</h3><p>利用Windows自带的<code>任务计划程序</code>调用特定的脚本文件即可。</p><h3>代码</h3><p>一共三个文件，两个用于任务调度，一个用于队列</p><h4>第一个<code>auto_git_pull.bat</code></h4><p>正式文件</p><pre><code class="lang-bat">@echo off
+cd /d %~dp0
+for /f %%i in (./auto_git_pull.ini) do @cd %~dp0%%i &amp;&amp; echo %%i &amp;&amp; @git pull &amp;&amp; echo.</code></pre><p>调试文件</p><pre><code class="lang-bat">@echo off
+cd /d %~dp0
+for /f %%i in (./auto_git_pull.ini) do @cd %~dp0%%i &amp;&amp; echo %%i &amp;&amp; @git pull &amp;&amp; echo.
+pause</code></pre><h4>第二个<code>auto_git_pull.vbs</code></h4><p>正式文件</p><pre><code class="lang-vbs">Set schedule = CreateObject(&quot;Wscript.Shell&quot;)
+path = CreateObject(&quot;Scripting.FileSystemObject&quot;).GetFile(Wscript.ScriptFullName).ParentFolder.Path
+schedule.run &quot;cmd /c &quot; + path + &quot;\auto_git_pull.bat&quot;,vbhide</code></pre><p>调试文件</p><pre><code class="lang-vbs">Set schedule = CreateObject(&quot;Wscript.Shell&quot;)
+path = CreateObject(&quot;Scripting.FileSystemObject&quot;).GetFile(Wscript.ScriptFullName).ParentFolder.Path
+schedule.run &quot;cmd /c &quot; + path + &quot;\auto_git_pull.bat&quot;</code></pre><h4>第三个<code>auto_git_pull.ini</code></h4><p>正式文件/调试文件 (这里的<code>demo1</code>、<code>demo2</code>指的是需要自动拉取的项目文件夹名，一行一个项目，灵活配置)</p><pre><code class="lang-ini">demo1
+demo2</code></pre><h3>教程</h3><p>首先如果你已经会了，请直接保存正式文件。如果不会，正式文件、调试文件请各保存一份，本文教程是基于调试文件。</p><ul><li>请将保存后的<code>auto_git_pull.bat</code>、<code>auto_git_pull.vbs</code>、<code>auto_git_pull.ini</code>三个文件放入工作目录里，如我的工作目录路径是<code>D:\www</code></li><li>资源管理器访问工作目录，运行<code>auto_git_pull.bat</code>。如果执行成功，在弹出的命令窗口里能看到如下图的示例数据。<br><img src="https://gitee.com/asundust/images/raw/master/images/image_19.jpg" alt="调试结果" title="调试结果"></li><li>如果运行通过，则开始最重要的任务计划配置了；如果没有通过，则根据提示继续调试。</li><li>接下去的教程由于本人在另外一篇教程中有比较详细的描述，各位请<a href="https://www.leeay.com/archives/58/">移步</a>的<code>任务调度教程</code>章节，搜索<code>win+R</code>开始阅读。</li></ul><h3>Tip</h3><ul><li>如果临时有需要可以直接运行<code>auto_git_pull.bat</code>文件就可以批量拉取了!</li></ul><hr class="content-copyright" style="margin-top:50px" /><blockquote class="content-copyright" style="font-style:normal"><p class="content-copyright">版权属于：塵世不再</p><p class="content-copyright">本文链接：<a class="content-copyright" href="https://www.leeay.com/archives/85/">https://www.leeay.com/archives/85/</a></p><p class="content-copyright">所有文章均采用 <span class="external-link"><a href="https://creativecommons.org/licenses/by-nc/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议<i data-feather='external-link'></i></a></span> 进行许可。 您可以自由的转载和修改，但请务必注明文章来源并且不可用于商业目的。<br/><br/>如果博客部分文章出现空白或异常，请留言或者联系博主修复。</p></blockquote>          </div>
+                              <!--文章页脚的广告位-->
+                 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-1558643366060586",
+    enable_page_level_ads: true
+  });
+</script>                          <!--文章的页脚部件：打赏和其他信息的输出-->
+             
+             <div class="show-foot">
+                 <div class="notebook">
+                     <i class="fontello fontello-clock-o"></i>
+                     <span>最后修改：2020 年 05 月 07 日 08 : 23  PM</span>
+                 </div>
+                 <div class="copyright" data-toggle="tooltip" data-html="true" data-original-title="转载请保留本文转载地址，著作权归作者所有"><span>© 允许规范转载</span>
+                 </div>
+             </div>
+                                      <!--打赏模块-->
+                 
+             <div class="support-author">
+                 <button data-toggle="modal" data-target="#myModal" class="btn btn-pay btn-danger btn-rounded"><i class="fontello fontello-wallet" aria-hidden="true"></i>&nbsp;赞赏</button>
+                 <div class="mt20 text-center article__reward-info">
+                     <span class="mr10">如果觉得我的文章对你有用，请随意赞赏</span>
+                 </div>
+             </div>
+             <div id="myModal" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+                 <div class="modal-dialog modal-sm" role="document">
+                     <div class="modal-content">
+                         <div class="modal-header">
+                             <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                             <h4 class="modal-title">赞赏作者</h4>
+                         </div>
+                         <div class="modal-body">
+                             <p class="text-center article__reward"> <strong class="article__reward-text">扫一扫支付</strong> </p>
+                             <div class="tab-content"><img noGallery aria-labelledby="alipay-tab" class="pay-img tab-pane fade in active" id="alipay_author" role="tabpanel" src="https://gitee.com/asundust/images/raw/master/images/pay_qrcode_alipay.png" /><img noGallery aria-labelledby="wechatpay-tab" class="pay-img tab-pane fade" id="wechatpay_author" role="tabpanel" src="https://gitee.com/asundust/images/raw/master/images/pay_qrcode_wechat.png" /></div>
+                             <div class="article__reward-border mb20 mt10"></div>
+
+                             <div class="text-center" role="tablist"><div class="pay-button" role="presentation" class="active"><button  href="#alipay_author" id="alipay-tab" aria-controls="alipay_author" role="tab" data-toggle="tab" class="btn m-b-xs m-r-xs btn-info"><i class="iconfont icon-alipay" aria-hidden="true"></i><span>&nbsp;支付宝支付</span></button>
+                                 </div><div class="pay-button" role="presentation"><button href="#wechatpay_author" id="wechatpay-tab" aria-controls="wechatpay_author" role="tab" data-toggle="tab" class="btn m-b-xs btn-success"><i class="iconfont icon-wechatpay" aria-hidden="true"></i><span>&nbsp;微信支付</span></button>
+                                 </div></div>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+                                  <!--/文章的页脚部件：打赏和其他信息的输出-->
+         </div>
+        </article>
+       </div>
+       <!--上一篇&下一篇-->
+       <nav class="m-t-lg m-b-lg">
+        <ul class="pager">
+        <li class="next"> <a class="box-shadow-wrap-normal" href="https://www.leeay.com/archives/75/" title="Laravel 一些笔记" data-toggle="tooltip"> 
+下一篇 </a></li>           </ul>
+       </nav>
+       <!--评论-->
+        
+            <style>
+            textarea#comment{
+                background-image: url('https://gitee.com/asundust/images/raw/master/images/blog_comment.png');
+                background-color: #ffffff;
+                transition: all 0.25s ease-in-out 0s;
+            }
+            textarea#comment:focus {
+                background-position-y: 105px;
+                transition: all 0.25s ease-in-out 0s;
+            }
+        </style>
+    
+    
+    <div id="comments">
+        
+                    <!--评论列表-->
+                    
+        <!--如果允许评论，会出现评论框和个人信息的填写-->
+                    <div id="respond-post-85" class="respond comment-respond no-borders">
+
+                <h4 id="reply-title" class="comment-reply-title m-t-lg m-b">发表评论                    <small><i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" title="使用cookie技术保留您的个人信息以便您下次快速评论，继续评论表示您已同意该条款"></i>
+                    </small>
+                    <small class="cancel-comment-reply">
+                        <a id="cancel-comment-reply-link" href="https://www.leeay.com/archives/85/#respond-post-85" rel="nofollow" style="display:none" onclick="return TypechoComment.cancelReply();">取消回复</a>                    </small>
+                </h4>
+                <form id="comment_form" method="post" action="https://www.leeay.com/archives/85/comment"  class="comment-form" role="form">
+                    <div class="comment-form-comment form-group">
+                        <label class="padder-v-sm" for="comment">评论                            <span class="required text-danger">*</span></label>
+                        <textarea id="comment" class="textarea form-control OwO-textarea" name="text" rows="5" placeholder="说点什么吧……" onkeydown="if(event.ctrlKey&&event.keyCode==13){document.getElementById('submit').click();return false};"></textarea>
+                        <div class="OwO padder-v-sm"></div>
+                        <div class="secret_comment" id="secret_comment" data-toggle="tooltip"
+                        data-original-title="开启该功能，您的评论仅作者和评论双方可见">
+                            <label class="secret_comment_label control-label">私密评论</label>
+                            <div class="secret_comment_check">
+                                <label class="i-switch i-switch-sm bg-dark m-b-ss m-r">
+                                    <input type="checkbox" id="secret_comment_checkbox">
+                                    <i></i>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <!--判断是否登录-->
+                                                                <div id="author_info" class="row row-sm">
+                                                        <div class="comment-form-author form-group col-sm-6 col-md-4">
+                                <label for="author">名称                                    <span class="required text-danger">*</span></label>
+                                <div>
+                                                                        <img class="author-avatar" src="https://secure.gravatar.com/avatar/d41d8cd98f00b204e9800998ecf8427e?s=65&r=G&d=" nogallery/>
+                                <input id="author" class="form-control" name="author" type="text" value="" maxlength="245" placeholder="姓名或昵称">
+                                </div>
+                            </div>
+
+                            <div class="comment-form-email form-group col-sm-6 col-md-4">
+                                <label for="email">邮箱                                    <span class="required text-danger">*</span>
+                                </label>
+                                <input type="text" name="mail" id="mail" class="form-control" placeholder="邮箱 (必填,将保密)" value="" />
+                                <input type="hidden" name="receiveMail" id="receiveMail" value="yes" />
+                            </div>
+
+                            <div class="comment-form-url form-group col-sm-12 col-md-4">
+                                <label for="url">地址</label>
+                                <input id="url" class="form-control" name="url" type="url" value="" maxlength="200" placeholder="网站或博客"></div>
+                        </div>
+                                                <!--提交按钮-->
+                        <div class="form-group">
+                            <button type="submit" name="submit" id="submit" class="submit btn-rounded box-shadow-wrap-lg btn-gd-primary padder-lg">
+                                <span>发表评论</span>
+                                <span class="text-active">提交中...</span>
+                            </button>
+                            <i class="animate-spin fontello fontello-spinner hide" id="spin"></i>
+                            <input type="hidden" name="comment_post_ID" id="comment_post_ID">
+                            <input type="hidden" name="comment_parent" id="comment_parent">
+                        </div>
+                </form>
+            </div>
+        
+            </div>
+
+
+      </div>
+     </div>
+     <!--文章右侧边栏开始-->
+             <aside class="asideBar col w-md bg-white-only bg-auto no-border-xs" role="complementary">
+     <div id="sidebar">
+      <section id="tabs-4" class="widget widget_tabs clear">
+       <div class="nav-tabs-alt no-js-hide">
+        <ul class="nav nav-tabs nav-justified box-shadow-bottom-normal tablist" role="tablist">
+         <li data-index="0" class="active" role="presentation"> <a href="#widget-tabs-4-hots" role="tab" aria-controls="widget-tabs-4-hots" aria-expanded="true" data-toggle="tab"><div class="sidebar-icon wrapper-sm"><i data-feather="thumbs-up"></i></div><span class="sr-only">热门文章</span> </a></li>
+                            <li role="presentation" data-index="1"> <a href="#widget-tabs-4-comments" role="tab" aria-controls="widget-tabs-4-comments" aria-expanded="false" data-toggle="tab"><div class="sidebar-icon wrapper-sm"><i  data-feather="message-square"></i></div> <span class="sr-only">最新评论</span> </a></li>
+                        <li data-index="2" role="presentation"> <a href="#widget-tabs-4-random" role="tab" aria-controls="widget-tabs-4-random" aria-expanded="false" data-toggle="tab"> <div class="sidebar-icon wrapper-sm"><i data-feather="gift"></i></div>  <span class="sr-only">随机文章</span>
+             </a></li>
+            <span class="navs-slider-bar"></span>
+        </ul>
+       </div>
+       <div class="tab-content">
+       <!--热门文章-->
+        <div id="widget-tabs-4-hots" class="tab-pane  fade in wrapper-md active" role="tabpanel">
+         <h5 class="widget-title m-t-none text-md">热门文章</h5>
+         <ul class="list-group no-bg no-borders pull-in m-b-none">
+          <li class="list-group-item">
+                <a href="https://www.leeay.com/archives/10/" class="pull-left thumb-sm m-r"><img src="https://www.leeay.com/usr/themes/handsome/usr/img/sj2/1.jpg" class="img-40px normal-shadow img-square"></a>
+                <div class="clear">
+                    <h4 class="h5 l-h text-second"> <a href="https://www.leeay.com/archives/10/" title="群晖教程 Transmission + Flexget 全自动订阅下载 2019-05-04"> 群晖教程 Transmission + Flexget 全自动订阅下载 2019-05-04 </a></h4>
+                    <small class="text-muted post-head-icon"><span class="meta-date"> <i class="fontello fontello-eye" aria-hidden="true"></i> <span class="sr-only">浏览次数:</span> <span class="meta-value">4518</span>
+                    </span>
+              </small></div></li><li class="list-group-item">
+                <a href="https://www.leeay.com/archives/68/" class="pull-left thumb-sm m-r"><img src="https://www.leeay.com/usr/themes/handsome/usr/img/sj2/4.jpg" class="img-40px normal-shadow img-square"></a>
+                <div class="clear">
+                    <h4 class="h5 l-h text-second"> <a href="https://www.leeay.com/archives/68/" title="Typecho博客handsome主题一行代码设置随机播放音乐教程2019-09-17"> Typecho博客handsome主题一行代码设置随机播放音乐教程2019-09-17 </a></h4>
+                    <small class="text-muted post-head-icon"><span class="meta-date"> <i class="fontello fontello-eye" aria-hidden="true"></i> <span class="sr-only">浏览次数:</span> <span class="meta-value">2777</span>
+                    </span>
+              </small></div></li><li class="list-group-item">
+                <a href="https://www.leeay.com/archives/44/" class="pull-left thumb-sm m-r"><img src="https://www.leeay.com/usr/themes/handsome/usr/img/sj2/5.jpg" class="img-40px normal-shadow img-square"></a>
+                <div class="clear">
+                    <h4 class="h5 l-h text-second"> <a href="https://www.leeay.com/archives/44/" title="Laravel-Admin 登录 滑动验证码插件 多平台支持 2020-05-07"> Laravel-Admin 登录 滑动验证码插件 多平台支持 2020-05-07 </a></h4>
+                    <small class="text-muted post-head-icon"><span class="meta-date"> <i class="fontello fontello-eye" aria-hidden="true"></i> <span class="sr-only">浏览次数:</span> <span class="meta-value">1822</span>
+                    </span>
+              </small></div></li><li class="list-group-item">
+                <a href="https://www.leeay.com/archives/58/" class="pull-left thumb-sm m-r"><img src="https://www.leeay.com/usr/themes/handsome/usr/img/sj2/7.jpg" class="img-40px normal-shadow img-square"></a>
+                <div class="clear">
+                    <h4 class="h5 l-h text-second"> <a href="https://www.leeay.com/archives/58/" title="Windows 下 Laravel Task Scheduling 任务调度(定时任务)/队列 99.99%完美的方案 2020-05-07"> Windows 下 Laravel Task Scheduling 任务调度(定时任务)/队列 99.99%完美的方案 2020-05-07 </a></h4>
+                    <small class="text-muted post-head-icon"><span class="meta-date"> <i class="fontello fontello-eye" aria-hidden="true"></i> <span class="sr-only">浏览次数:</span> <span class="meta-value">1424</span>
+                    </span>
+              </small></div></li><li class="list-group-item">
+                <a href="https://www.leeay.com/archives/1/" class="pull-left thumb-sm m-r"><img src="https://www.leeay.com/usr/themes/handsome/usr/img/sj2/10.jpg" class="img-40px normal-shadow img-square"></a>
+                <div class="clear">
+                    <h4 class="h5 l-h text-second"> <a href="https://www.leeay.com/archives/1/" title="人类首张黑洞照片 First Image of a Black Hole (内附下载地址)"> 人类首张黑洞照片 First Image of a Black Hole (内附下载地址) </a></h4>
+                    <small class="text-muted post-head-icon"><span class="meta-date"> <i class="fontello fontello-eye" aria-hidden="true"></i> <span class="sr-only">浏览次数:</span> <span class="meta-value">1358</span>
+                    </span>
+              </small></div></li>         </ul>
+        </div>
+                   <!--最新评论-->
+        <div id="widget-tabs-4-comments" class="tab-pane fade wrapper-md no-js-show" role="tabpanel">
+         <h5 class="widget-title m-t-none text-md">最新评论</h5>
+         <ul class="list-group no-borders pull-in auto m-b-none no-bg">
+                              <li class="list-group-item">
+
+              <a href="https://www.leeay.com/archives/68/#comment-17" class="pull-left thumb-sm avatar m-r">
+                  <img nogallery src="https://secure.gravatar.com/avatar/ef1b4bea2a6bc85c7546afe53e94643b?s=65&r=G&d=" class="img-40px photo img-square normal-shadow">              </a>
+              <a href="https://www.leeay.com/archives/68/#comment-17" class="text-muted">
+                  <!--<i class="iconfont icon-comments-o text-muted pull-right m-t-sm text-sm" title="" aria-hidden="true" data-toggle="tooltip" data-placement="auto left"></i>
+                  <span class="sr-only"></span>-->
+              </a>
+              <div class="clear">
+                  <div class="text-ellipsis">
+                      <a href="https://www.leeay.com/archives/68/#comment-17" title="assd"> assd </a>
+                  </div>
+                  <small class="text-muted">
+                      <span>
+                          好像对于自定义的音乐播放没用                      </span>
+                  </small>
+              </div>
+          </li>
+                    <li class="list-group-item">
+
+              <a href="https://www.leeay.com/archives/68/#comment-16" class="pull-left thumb-sm avatar m-r">
+                  <img nogallery src="https://q.qlogo.cn/g?b=qq&nk=1306637241&s=100" class="img-40px photo img-square normal-shadow">              </a>
+              <a href="https://www.leeay.com/archives/68/#comment-16" class="text-muted">
+                  <!--<i class="iconfont icon-comments-o text-muted pull-right m-t-sm text-sm" title="" aria-hidden="true" data-toggle="tooltip" data-placement="auto left"></i>
+                  <span class="sr-only"></span>-->
+              </a>
+              <div class="clear">
+                  <div class="text-ellipsis">
+                      <a href="https://www.leeay.com/archives/68/#comment-16" title="Tom"> Tom </a>
+                  </div>
+                  <small class="text-muted">
+                      <span>
+                          看一看                      </span>
+                  </small>
+              </div>
+          </li>
+                    <li class="list-group-item">
+
+              <a href="https://www.leeay.com/archives/10/#comment-15" class="pull-left thumb-sm avatar m-r">
+                  <img nogallery src="https://secure.gravatar.com/avatar/8a429ff5340d3aac4eb4f776a10e9ea1?s=65&r=G&d=" class="img-40px photo img-square normal-shadow">              </a>
+              <a href="https://www.leeay.com/archives/10/#comment-15" class="text-muted">
+                  <!--<i class="iconfont icon-comments-o text-muted pull-right m-t-sm text-sm" title="" aria-hidden="true" data-toggle="tooltip" data-placement="auto left"></i>
+                  <span class="sr-only"></span>-->
+              </a>
+              <div class="clear">
+                  <div class="text-ellipsis">
+                      <a href="https://www.leeay.com/archives/10/#comment-15" title="欲说还休"> 欲说还休 </a>
+                  </div>
+                  <small class="text-muted">
+                      <span>
+                          DS管理极为不便，种子少还好，要是成百上千的种子就难受了                      </span>
+                  </small>
+              </div>
+          </li>
+                    <li class="list-group-item">
+
+              <a href="https://www.leeay.com/archives/68/#comment-8" class="pull-left thumb-sm avatar m-r">
+                  <img nogallery src="https://secure.gravatar.com/avatar/ddd3049abb891563d69b4fac7f624ae7?s=65&r=G&d=" class="img-40px photo img-square normal-shadow">              </a>
+              <a href="https://www.leeay.com/archives/68/#comment-8" class="text-muted">
+                  <!--<i class="iconfont icon-comments-o text-muted pull-right m-t-sm text-sm" title="" aria-hidden="true" data-toggle="tooltip" data-placement="auto left"></i>
+                  <span class="sr-only"></span>-->
+              </a>
+              <div class="clear">
+                  <div class="text-ellipsis">
+                      <a href="https://www.leeay.com/archives/68/#comment-8" title="阿捷吖"> 阿捷吖 </a>
+                  </div>
+                  <small class="text-muted">
+                      <span>
+                          厉害了！                      </span>
+                  </small>
+              </div>
+          </li>
+                    <li class="list-group-item">
+
+              <a href="https://www.leeay.com/archives/10/#comment-7" class="pull-left thumb-sm avatar m-r">
+                  <img nogallery src="https://secure.gravatar.com/avatar/7fd23aed065dbd66d9316a923ad0d3f3?s=65&r=G&d=" class="img-40px photo img-square normal-shadow">              </a>
+              <a href="https://www.leeay.com/archives/10/#comment-7" class="text-muted">
+                  <!--<i class="iconfont icon-comments-o text-muted pull-right m-t-sm text-sm" title="" aria-hidden="true" data-toggle="tooltip" data-placement="auto left"></i>
+                  <span class="sr-only"></span>-->
+              </a>
+              <div class="clear">
+                  <div class="text-ellipsis">
+                      <a href="https://www.leeay.com/archives/10/#comment-7" title="spanbin"> spanbin </a>
+                  </div>
+                  <small class="text-muted">
+                      <span>
+                          通过命令可以启动flexget/volume1/@appsto...                      </span>
+                  </small>
+              </div>
+          </li>
+                   </ul>
+        </div>
+                   <!--随机文章-->
+        <div id="widget-tabs-4-random" class="tab-pane fade wrapper-md no-js-show" role="tabpanel">
+            <h5 class="widget-title m-t-none text-md">随机文章</h5>
+            <ul class="list-group no-bg no-borders pull-in">
+            <li class="list-group-item">
+                <a href="https://www.leeay.com/archives/75/" class="pull-left thumb-sm m-r"><img src="https://www.leeay.com/usr/themes/handsome/usr/img/sj2/1.jpg" class="img-40px normal-shadow img-square"></a>
+                <div class="clear">
+                    <h4 class="h5 l-h text-second"> <a href="https://www.leeay.com/archives/75/" title="Laravel 一些笔记"> Laravel 一些笔记 </a></h4>
+                    <small class="text-muted post-head-icon"><span class="meta-date"> <i class="fontello fontello-eye" aria-hidden="true"></i> <span class="sr-only">浏览次数:</span> <span class="meta-value">539</span>
+                    </span>
+              </small></div></li><li class="list-group-item">
+                <a href="https://www.leeay.com/archives/1/" class="pull-left thumb-sm m-r"><img src="https://www.leeay.com/usr/themes/handsome/usr/img/sj2/4.jpg" class="img-40px normal-shadow img-square"></a>
+                <div class="clear">
+                    <h4 class="h5 l-h text-second"> <a href="https://www.leeay.com/archives/1/" title="人类首张黑洞照片 First Image of a Black Hole (内附下载地址)"> 人类首张黑洞照片 First Image of a Black Hole (内附下载地址) </a></h4>
+                    <small class="text-muted post-head-icon"><span class="meta-date"> <i class="fontello fontello-eye" aria-hidden="true"></i> <span class="sr-only">浏览次数:</span> <span class="meta-value">1358</span>
+                    </span>
+              </small></div></li><li class="list-group-item">
+                <a href="https://www.leeay.com/archives/68/" class="pull-left thumb-sm m-r"><img src="https://www.leeay.com/usr/themes/handsome/usr/img/sj2/5.jpg" class="img-40px normal-shadow img-square"></a>
+                <div class="clear">
+                    <h4 class="h5 l-h text-second"> <a href="https://www.leeay.com/archives/68/" title="Typecho博客handsome主题一行代码设置随机播放音乐教程2019-09-17"> Typecho博客handsome主题一行代码设置随机播放音乐教程2019-09-17 </a></h4>
+                    <small class="text-muted post-head-icon"><span class="meta-date"> <i class="fontello fontello-eye" aria-hidden="true"></i> <span class="sr-only">浏览次数:</span> <span class="meta-value">2777</span>
+                    </span>
+              </small></div></li><li class="list-group-item">
+                <a href="https://www.leeay.com/archives/58/" class="pull-left thumb-sm m-r"><img src="https://www.leeay.com/usr/themes/handsome/usr/img/sj2/7.jpg" class="img-40px normal-shadow img-square"></a>
+                <div class="clear">
+                    <h4 class="h5 l-h text-second"> <a href="https://www.leeay.com/archives/58/" title="Windows 下 Laravel Task Scheduling 任务调度(定时任务)/队列 99.99%完美的方案 2020-05-07"> Windows 下 Laravel Task Scheduling 任务调度(定时任务)/队列 99.99%完美的方案 2020-05-07 </a></h4>
+                    <small class="text-muted post-head-icon"><span class="meta-date"> <i class="fontello fontello-eye" aria-hidden="true"></i> <span class="sr-only">浏览次数:</span> <span class="meta-value">1424</span>
+                    </span>
+              </small></div></li><li class="list-group-item">
+                <a href="https://www.leeay.com/archives/44/" class="pull-left thumb-sm m-r"><img src="https://www.leeay.com/usr/themes/handsome/usr/img/sj2/10.jpg" class="img-40px normal-shadow img-square"></a>
+                <div class="clear">
+                    <h4 class="h5 l-h text-second"> <a href="https://www.leeay.com/archives/44/" title="Laravel-Admin 登录 滑动验证码插件 多平台支持 2020-05-07"> Laravel-Admin 登录 滑动验证码插件 多平台支持 2020-05-07 </a></h4>
+                    <small class="text-muted post-head-icon"><span class="meta-date"> <i class="fontello fontello-eye" aria-hidden="true"></i> <span class="sr-only">浏览次数:</span> <span class="meta-value">1822</span>
+                    </span>
+              </small></div></li>            </ul>
+        </div>
+       </div>
+      </section>
+      <!--博客信息-->
+               <section id="blog_info" class="widget widget_categories wrapper-md clear">
+       <h5 class="widget-title m-t-none text-md">博客信息</h5>
+       <ul class="list-group box-shadow-wrap-normal">
+                      <li class="list-group-item text-second"><span class="blog-info-icons"> <i data-feather="award"></i></span> <span
+                       class="badge
+           pull-right">8</span>文章数目</li>
+           <li class="list-group-item text-second"> <span class="blog-info-icons"> <i data-feather="message-circle"></i></span>
+               <span class="badge
+           pull-right">15</span>评论数目</li>
+           <li class="list-group-item text-second"><span class="blog-info-icons"> <i data-feather="calendar"></i></span>
+               <span class="badge
+           pull-right">1年360天</span>运行天数</li>
+           <li class="list-group-item text-second"><span class="blog-info-icons"> <i data-feather="activity"></i></span> <span
+                       class="badge
+           pull-right">5 个月前</span>最后活动</li>
+       </ul>
+      </section>
+                        <!--广告位置-->
+         <section id="a_d_sidebar" class="widget widget_categories wrapper-md clear">
+             <h5 class="widget-title m-t-none text-md">广告</h5>
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-1558643366060586",
+    enable_page_level_ads: true
+  });
+</script>         </section>
+                  <!--非文章页面-->
+                <!--文章页面-->
+          <section id="tag_cloud-2" class="widget widget_tag_cloud wrapper-md clear">
+              <h5 class="widget-title m-t-none text-md">标签云</h5>
+              <div class="post-tags tags l-h-2x">
+                  暂无标签              </div>
+          </section>
+                    <div id="tag_toc_body">
+              <section id="tag_toc" class="widget widget_categories wrapper-md clear">
+                  <h5 class="widget-title m-t-none text-md">文章目录</h5>
+                  <div class="tags l-h-2x box-shadow-wrap-normal">
+                      <div id="toc"></div>
+                  </div>
+              </section>
+
+              <div class="hidden-lg tocify-mobile-panel panel panel-default
+              setting_body_panel"
+                   aria-hidden="true">
+                  <button class="border-radius-half-left btn btn-default no-shadow pos-abt " data-toggle="tooltip" data-placement="left"
+                          data-original-title="目录" data-toggle-class=".tocify-mobile-panel=active">
+                      <i class="glyphicon glyphicon-resize-full"></i>
+                  </button>
+                  <div class="panel-heading">文章目录</div>
+                  <div class="setting_body toc-mobile-body">
+                      <div class="panel-body">
+                          <div class="tocTree"></div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+                  </div>
+     </aside>
+       <!--文章右侧边栏结束-->
+    </div>
+   </main>
+
+
+    <div id="morphing-content" class="hidden read_mode_article">
+        <div class="page">
+            <h1 class="title">本地开发GIT实现自动拉取更新代码 一键git pull 多项目支持</h1>
+            <div class="metadata singleline"><a href="#" rel="author" class="byline">asundust</a>&nbsp;•&nbsp;<span class="delimiter"></span><time class="date">2020 年 05 月 07 日</time></div>
+            <h3>背景</h3><p>日常开发下会有很多项目要处理，但是每次去开发一个很久没有动过的项目会发现代码有很多更新没有拉取，去手动<code>git pull</code>可能会需要很久的时间。所以稍微研究了一下，写了个脚本，用于定时拉取常用的项目。</p><h3>原理</h3><p>利用Windows自带的<code>任务计划程序</code>调用特定的脚本文件即可。</p><h3>代码</h3><p>一共三个文件，两个用于任务调度，一个用于队列</p><h4>第一个<code>auto_git_pull.bat</code></h4><p>正式文件</p><pre><code class="lang-bat">@echo off
+cd /d %~dp0
+for /f %%i in (./auto_git_pull.ini) do @cd %~dp0%%i &amp;&amp; echo %%i &amp;&amp; @git pull &amp;&amp; echo.</code></pre><p>调试文件</p><pre><code class="lang-bat">@echo off
+cd /d %~dp0
+for /f %%i in (./auto_git_pull.ini) do @cd %~dp0%%i &amp;&amp; echo %%i &amp;&amp; @git pull &amp;&amp; echo.
+pause</code></pre><h4>第二个<code>auto_git_pull.vbs</code></h4><p>正式文件</p><pre><code class="lang-vbs">Set schedule = CreateObject(&quot;Wscript.Shell&quot;)
+path = CreateObject(&quot;Scripting.FileSystemObject&quot;).GetFile(Wscript.ScriptFullName).ParentFolder.Path
+schedule.run &quot;cmd /c &quot; + path + &quot;\auto_git_pull.bat&quot;,vbhide</code></pre><p>调试文件</p><pre><code class="lang-vbs">Set schedule = CreateObject(&quot;Wscript.Shell&quot;)
+path = CreateObject(&quot;Scripting.FileSystemObject&quot;).GetFile(Wscript.ScriptFullName).ParentFolder.Path
+schedule.run &quot;cmd /c &quot; + path + &quot;\auto_git_pull.bat&quot;</code></pre><h4>第三个<code>auto_git_pull.ini</code></h4><p>正式文件/调试文件 (这里的<code>demo1</code>、<code>demo2</code>指的是需要自动拉取的项目文件夹名，一行一个项目，灵活配置)</p><pre><code class="lang-ini">demo1
+demo2</code></pre><h3>教程</h3><p>首先如果你已经会了，请直接保存正式文件。如果不会，正式文件、调试文件请各保存一份，本文教程是基于调试文件。</p><ul><li>请将保存后的<code>auto_git_pull.bat</code>、<code>auto_git_pull.vbs</code>、<code>auto_git_pull.ini</code>三个文件放入工作目录里，如我的工作目录路径是<code>D:\www</code></li><li>资源管理器访问工作目录，运行<code>auto_git_pull.bat</code>。如果执行成功，在弹出的命令窗口里能看到如下图的示例数据。<br><img src="https://gitee.com/asundust/images/raw/master/images/image_19.jpg" alt="调试结果" title="调试结果"></li><li>如果运行通过，则开始最重要的任务计划配置了；如果没有通过，则根据提示继续调试。</li><li>接下去的教程由于本人在另外一篇教程中有比较详细的描述，各位请<a href="https://www.leeay.com/archives/58/">移步</a>的<code>任务调度教程</code>章节，搜索<code>win+R</code>开始阅读。</li></ul><h3>Tip</h3><ul><li>如果临时有需要可以直接运行<code>auto_git_pull.bat</code>文件就可以批量拉取了!</li></ul><hr class="content-copyright" style="margin-top:50px" /><blockquote class="content-copyright" style="font-style:normal"><p class="content-copyright">版权属于：塵世不再</p><p class="content-copyright">本文链接：<a class="content-copyright" href="https://www.leeay.com/archives/85/">https://www.leeay.com/archives/85/</a></p><p class="content-copyright">所有文章均采用 <span class="external-link"><a href="https://creativecommons.org/licenses/by-nc/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议<i data-feather='external-link'></i></a></span> 进行许可。 您可以自由的转载和修改，但请务必注明文章来源并且不可用于商业目的。<br/><br/>如果博客部分文章出现空白或异常，请留言或者联系博主修复。</p></blockquote>
+        </div>
+    </div>
+    <script>
+        try {
+            $("[data-morphing]").fancyMorph({
+                hash : 'morphing'
+            });
+        }catch (e){
+
+        }
+
+            </script>
+<!-- footer -->
+	<script type="text/javascript">
+(function () {
+    window.TypechoComment = {
+        dom : function (id) {
+            return document.getElementById(id);
+        },
+    
+        create : function (tag, attr) {
+            var el = document.createElement(tag);
+        
+            for (var key in attr) {
+                el.setAttribute(key, attr[key]);
+            }
+        
+            return el;
+        },
+
+        reply : function (cid, coid) {
+            var comment = this.dom(cid), parent = comment.parentNode,
+                response = this.dom('respond-post-85'), input = this.dom('comment-parent'),
+                form = 'form' == response.tagName ? response : response.getElementsByTagName('form')[0],
+                textarea = response.getElementsByTagName('textarea')[0];
+
+            if (null == input) {
+                input = this.create('input', {
+                    'type' : 'hidden',
+                    'name' : 'parent',
+                    'id'   : 'comment-parent'
+                });
+
+                form.appendChild(input);
+            }
+
+            input.setAttribute('value', coid);
+
+            if (null == this.dom('comment-form-place-holder')) {
+                var holder = this.create('div', {
+                    'id' : 'comment-form-place-holder'
+                });
+
+                response.parentNode.insertBefore(holder, response);
+            }
+
+            comment.appendChild(response);
+            this.dom('cancel-comment-reply-link').style.display = '';
+
+            if (null != textarea && 'text' == textarea.name) {
+                textarea.focus();
+            }
+
+            return false;
+        },
+
+        cancelReply : function () {
+            var response = this.dom('respond-post-85'),
+            holder = this.dom('comment-form-place-holder'), input = this.dom('comment-parent');
+
+            if (null != input) {
+                input.parentNode.removeChild(input);
+            }
+
+            if (null == holder) {
+                return true;
+            }
+
+            this.dom('cancel-comment-reply-link').style.display = 'none';
+            holder.parentNode.insertBefore(response, holder);
+            return false;
+        }
+    };
+})();
+</script>
+<script type="text/javascript">
+var registCommentEvent = function() {
+    var event = document.addEventListener ? {
+        add: 'addEventListener',
+        focus: 'focus',
+        load: 'DOMContentLoaded'
+    } : {
+        add: 'attachEvent',
+        focus: 'onfocus',
+        load: 'onload'
+    };
+    var r = document.getElementById('respond-post-85');
+        
+    if (null != r) {
+        var forms = r.getElementsByTagName('form');
+        if (forms.length > 0) {
+            var f = forms[0], textarea = f.getElementsByTagName('textarea')[0], added = false;
+
+            if (null != textarea && 'text' == textarea.name) {
+                textarea[event.add](event.focus, function () {
+                    if (!added) {
+                        var input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = '_';
+                            input.value = (function () {
+    var _MSpj = //'of'
+'c36'+//'L'
+'60'+''///*'iJ'*/'iJ'
++'13'//'Wgi'
++''///*'1'*/'1'
++'9b'//'DRu'
++'674'//'yS0'
++//'Gu0'
+'6'+'cf'//'sa'
++//'K'
+'64'+'3b'//'K'
++/* 'YWu'//'YWu' */''+//'5k'
+'928'+//'ZUr'
+'eb'+'f'//'h'
++//'N'
+'3'+'40'//'4'
++//'U'
+'876'+//'8zd'
+'8zd'+//'v1'
+'2', _elQ = [[31,34]];
+    
+    for (var i = 0; i < _elQ.length; i ++) {
+        _MSpj = _MSpj.substring(0, _elQ[i][0]) + _MSpj.substring(_elQ[i][1]);
+    }
+
+    return _MSpj;
+})();
+                    
+                        f.appendChild(input);
+                        
+                        input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'checkReferer';
+                        input.value = 'false';
+                        
+                        f.appendChild(input);
+                        
+
+                        added = true;
+                    }
+                });
+            }
+        }
+    }
+};
+</script></div><!-- /content -->
+  <footer id="footer" class="app-footer" role="footer">
+    <div class="wrapper bg-light">
+      <span class="pull-right hidden-xs text-ellipsis">
+            Powered by <a target="_blank" href="http://www.typecho.org">Typecho</a>&nbsp;|&nbsp;Theme by <a target="_blank"
+                                                                                                     href="https://www.ihewro.com/archives/489/">handsome</a>
+      </span>
+        <span class="text-ellipsis">&copy;&nbsp;2020 Copyright&nbsp;<a href="http://www.beian.miit.gov.cn" target="_blank">浙ICP备18050004号-1</a></span>
+    </div>
+      <!--可以去除主题版权信息，最好保留版权信息或者添加主题信息到友链，谢谢你的理解-->
+            <style>
+          .topButton>.btn{
+              top: 0;
+          }
+          </style>
+      
+      <div class="topButton panel panel-default">
+          <button id="goToTop" class="btn btn-default no-shadow pos-abt hide  border-radius-half-left"
+                  data-toggle="tooltip" data-placement="left" data-original-title="返回顶部">
+              <i class="fontello fontello-chevron-circle-up" aria-hidden="true"></i>
+          </button>
+      </div>
+  </footer>
+  </div><!--end of .app app-header-fixed-->
+
+<script type="text/javascript">
+	(function(){
+		var pres = document.querySelectorAll('pre');
+		var lineNumberClassName = 'line-numbers';
+		pres.forEach(function (item, index) {
+			item.className = item.className == '' ? lineNumberClassName : item.className + ' ' + lineNumberClassName;
+		});
+	})();
+</script>
+<script type="text/javascript" src="https://www.leeay.com/usr/plugins/CodePrettify/static/clipboard.min.js"></script>
+<script type="text/javascript" src="https://www.leeay.com/usr/plugins/CodePrettify/static/prism.js"></script>
+<script>
+SearchConfig = {
+    url : "https://www.leeay.com/usr/plugins/Handsome/cache/search.json"
+}
+</script>
+
+
+    <!--定义全局变量-->
+    <script type="text/javascript">
+        window['LocalConst'] = {
+            COMMENT_NAME_INFO: '必须填写昵称或姓名',
+            COMMENT_EMAIL_INFO: '必须填写电子邮箱地址',
+            COMMENT_EMAIL_LEGAL_INFO: '邮箱地址不合法',
+            COMMENT_CONTENT_INFO: '必须填写评论内容',
+            COMMENT_SUBMIT_ERROR: '提交失败，请重试！',
+            COMMENT_CONTENT_LEGAL_INFO: '提交失败,评论被拦截，可能发言太快或内容不符合规则',
+
+            LOGIN_USERNAME_INFO: '必须填写用户名',
+            LOGIN_PASSWORD_INFO: '请填写密码',
+            LOGIN_SUBMIT_ERROR: '登录失败，请重新登录',
+            LOGIN_SUBMIT_INFO: '用户名或者密码错误，请重试',
+            LOGIN_SUBMIT_SUCCESS: '登录成功',
+            CLICK_TO_REFRESH: '点击以刷新页面',
+            LOGOUT_SUCCESS_REFRESH: '退出成功，正在刷新当前页面',
+
+            LOGOUT_ERROR: '退出失败，请重试',
+            LOGOUT_SUCCESS: '退出成功',
+
+            SUBMIT_PASSWORD_INFO: '密码错误，请重试',
+            COMMENT_TITLE: '评论通知',
+            LOGIN_TITLE: '登录通知',
+            ChANGYAN_APP_KEY: '',
+            CHANGYAN_CONF: '',
+
+            COMMENT_SYSTEM: '0',
+            COMMENT_SYSTEM_ROOT: '0',
+            COMMENT_SYSTEM_CHANGYAN: '1',
+            COMMENT_SYSTEM_OTHERS: '2',
+            EMOJI: '表情',
+            IS_PJAX: '1',
+            IS_PAJX_COMMENT: '1',
+            BASE_SCRIPT_URL: 'https://www.leeay.com/usr/themes/handsome/',
+            BLOG_URL: 'https://www.leeay.com/',
+            BLOG_URL_PHP: 'https://www.leeay.com/',
+            THEME_COLOR: '8',
+            THEME_COLOR_EDIT: '',
+            THEME_HEADER_FIX: '1',
+            THEME_ASIDE_FIX: '1',
+            THEME_ASIDE_FOLDED: '',
+            THEME_ASIDE_DOCK: '',
+            THEME_CONTAINER_BOX: '1',
+            THEME_HIGHLIGHT_CODE: '1',
+            THEME_TOC: '1',
+            TOC_TITLE: '文章目录',
+            HEADER_FIX: '固定头部',
+            ASIDE_FIX: '固定导航',
+            ASIDE_FOLDED: '折叠导航',
+            ASIDE_DOCK: '置顶导航',
+            CONTAINER_BOX: '盒子模型',
+            OFF_SCROLL_HEIGHT: '50',
+            COMMENT_REJECT_PLACEHOLDER: '居然什么也不说，哼',
+            COMMENT_PLACEHOLDER: '说点什么吧……',
+            SHOW_SETTING_BUTTON: '',
+            THEME_VERSION: '6.0.020191205',
+
+            OPERATION_NOTICE: '操作通知',
+            SCREENSHOT_BEGIN: '正在生成当前页面截图……',
+            SCREENSHOT_NOTICE: '点击顶部下载按钮保存当前卡片',
+            SCREENSHORT_ERROR: '由于图片跨域原因导致截图失败',
+            SCREENSHORT_SUCCESS: '截图成功',
+            MUSIC_NOTICE: '播放通知',
+            MUSIC_FAILE: '当前音乐地址无效，自动为您播放下一首',
+            MUSIC_FAILE_END: '当前音乐地址无效',
+            MUSIC_LIST_SUCCESS: '歌单歌曲加载成功',
+            CDN_NAME: '',
+            LAZY_LOAD: ''
+        };
+
+    </script>
+
+
+
+<!--CDN加载-->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.4/dist/js/bootstrap.min.js"></script>
+
+
+    <script src="https://www.leeay.com/usr/themes/handsome/assets/js/features/jquery.pjax.min.js" type="text/javascript"></script>
+    <script>
+        $(document).pjax('a[href^="https://www.leeay.com/"]:not(a[target="_blank"], a[no-pjax])', {
+            container: '#content',
+            fragment: '#content',
+            timeout: 8000
+        }).on('pjax:send',function () {
+                        $('#loading').removeClass('hide');
+                    }).on('pjax:click', function() {
+
+            window['Page'].doPJAXClickAction();
+            
+                        $('body,html').animate({scrollTop:0},100);
+            
+
+        }).on('pjax:complete', function() {
+            window['Page'].doPJAXCompleteAction();
+            if ($(".post-position").length > 0){
+                window['Page'].doPJAXCompletePostAction();
+            }
+                                    $('#loading').addClass('hide');
+            
+            if (typeof Prism !== 'undefined') {
+var pres = document.getElementsByTagName('pre');
+                for (var i = 0; i < pres.length; i++){
+                    if (pres[i].getElementsByTagName('code').length > 0)
+                        pres[i].className  = 'line-numbers';}
+Prism.highlightAll(true,null);}            
+
+        })
+    </script>
+
+
+<!--主题组件js加载-->
+
+    <!--平滑滚动组件-->
+    <script src="https://www.leeay.com/usr/themes/handsome/assets/js/features/SmoothScroll.min.js"></script>
+
+
+<!--pjax动画组件-->
+
+
+<script src="https://www.leeay.com/usr/themes/handsome/assets/js/features/feather.min.js?v=6.0.020191205"></script>
+
+
+
+
+<!--lightgallery必备组件-->
+<script src="https://www.leeay.com/usr/themes/handsome/assets/js/features/jquery.fancybox.min.js?v=6.0.020191205"></script>
+<script src="https://www.leeay.com/usr/themes/handsome/assets/js/features/easypiechart.min.js?v=6.0.020191205"></script>
+
+
+    <!--component/comments.php 页面必需js（只有选择了原生评论的时候才会加载）-->
+    <script src="https://www.leeay.com/usr/themes/handsome/assets/js/features/OwO.min.js?v=6.0.020191205"></script>
+    <!--component/comments.php 必需js结束-->
+
+
+<!--主题组件js加载结束-->
+
+<!--主题核心js-->
+    <script src="https://www.leeay.com/usr/themes/handsome/assets/js/function.min.js?v=6.0.020191205"></script>
+    <script src="https://www.leeay.com/usr/themes/handsome/assets/js/core.min.js?v=6.0.020191205"></script>
+
+
+    <!--全局播放器组件-->
+    <script src="https://www.leeay.com/usr/themes/handsome/assets/js/features/music.min.js?v=6.0.020191205"></script>
+    <script>
+                var player = new skPlayer({"autoplay":false,"listshow":false,"mode":"listloop","music":{"type":"cloud","source":"2133383765","media":"tencent"}});
+    </script>
+
+
+    <script type="text/javascript">
+        /* 鼠标特效 */
+var a_idx = 0; 
+jQuery(document).ready(function($) { 
+    $("body").click(function(e) { 
+        var a = new Array("富强", "民主", "文明", "和谐", "自由", "平等", "公正" ,"法治", "爱国", "敬业", "诚信", "友善"); 
+        var $i = $("<span/>").text(a[a_idx]); 
+        a_idx = (a_idx + 1) % a.length; 
+        var x = e.pageX, 
+        y = e.pageY; 
+        $i.css({ 
+            "z-index": 999999999999999999999999999999999999999999999999999999999999999999999, 
+            "top": y - 20, 
+            "left": x, 
+            "position": "absolute", 
+            "font-weight": "bold", 
+            "color": "#ff6651" 
+        }); 
+        $("body").append($i); 
+        $i.animate({ 
+            "top": y - 180, 
+            "opacity": 0 
+        }, 
+        1500, 
+        function() { 
+            $i.remove(); 
+        }); 
+    }); 
+}); 
+</script>    </script>
+
+
+</body>
+</html><!--html end-->
+  	<!-- / footer -->
+
+
